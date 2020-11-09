@@ -77,7 +77,8 @@ export const Title = styled.h1`
     }
 
     div {
-      margin-left: 16px;
+      margin-left: 0 16px;
+      flex: 1;
 
       strong {
         font-size: 20px;

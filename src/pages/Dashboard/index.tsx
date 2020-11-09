@@ -1,48 +1,58 @@
-import React from 'react';
+import React, { useState, FormEvent } from 'react';
 import { FiChevronRight } from 'react-icons/fi';
+import api from '../../services/api';
 
 import logoImg from '../../assets/logo.svg';
 
 import { Title, Form, Repositories } from './styles';
 
+interface Repository {
+  full_name: string;
+  description: string;
+  owner: {
+    login: string;
+    avatar_url: string;
+  };
+}
+
 const Dashboard: React.FC = () => {
+  const [newRepo, setNewRepo] = useState('');
+  const [repositories, setRepositories] = useState<Repository[]>([]);
+
+  async function handleAddRepository(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+
+    const response = await api.get<Repository>(`repos/${newRepo}`);
+
+    const repository = response.data;
+
+    setRepositories([...repositories, repository]);
+    setNewRepo('');
+  }
   return (
     <>
       <img src={logoImg} alt="Github Explorer" />
       <Title>Explore repositórios no GitHub</Title>
 
-      <Form>
-        <input placeholder="Digite o nome do repositório" />
+      <Form onSubmit={handleAddRepository}>
+        <input
+          value={newRepo}
+          onChange={(e) => setNewRepo(e.target.value)}
+          placeholder="Digite o nome do repositório" />
         <button type="submit">Pesquisar</button>
       </Form>
 
       <Repositories>
-        <a href="teste">
-          <img src="https://media-exp1.licdn.com/dms/image/C4D03AQEIo5yV_WiaHQ/profile-displayphoto-shrink_200_200/0?e=1610582400&v=beta&t=JQzlg7vqagucnnQ5CpnjoePwmYRhKOnh5mdLEi4tgKs" alt="Guilherme Munis"/>
-          <div>
-            <strong>rocketseat/unform</strong>
-            <p>Easy peasy highly scalable ReactJS & React Native forms!</p>
-          </div>
-
-          <FiChevronRight size={20} />
-        </a>
-        <a href="teste">
-          <img src="https://media-exp1.licdn.com/dms/image/C4D03AQE7bwUoMtXNwQ/profile-displayphoto-shrink_200_200/0?e=1610582400&v=beta&t=WT6XQvOZz-49JBeEGh4WY50_AqkE5siQl2ohwvFj_KM" alt="Thiago Candal"/>
-          <div>
-            <strong>rocketseat/unform</strong>
-            <p>Easy peasy highly scalable ReactJS & React Native forms!</p>
-          </div>
-
-          <FiChevronRight size={20} />
-        </a><a href="teste">
-          <img src="https://media-exp1.licdn.com/dms/image/C4D03AQEqhiJCWUi_Mg/profile-displayphoto-shrink_200_200/0?e=1610582400&v=beta&t=633OHQS8J2v8WxgVSbzrMZNphXSZ9cker_r8c8Xnt0c" alt="Geovana Munis"/>
-          <div>
-            <strong>rocketseat/unform</strong>
-            <p>Easy peasy highly scalable ReactJS & React Native forms!</p>
-          </div>
-
-          <FiChevronRight size={20} />
-        </a>
+        {repositories.map(repository => (
+          <a key={repository.full_name} href="teste">
+            <img src={repository.owner.avatar_url} alt={repository.owner.login} />
+            <div>
+              <strong>{repository.full_name}</strong>
+              <p>{repository.description}</p>
+            </div>
+            <FiChevronRight size={20} />
+          </a>
+        ))}
       </Repositories>
     </>
   );
